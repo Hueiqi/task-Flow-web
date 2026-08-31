@@ -2,3 +2,7 @@ node_modules/
 release/
 release-*/
 *.log
+backend/taskflow.db*
+~$*.docx
+report_tools/
+TaskFlow_Short_Project_Report.docx

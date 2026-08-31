@@ -1,111 +1,111 @@
 # TaskFlow
 
-A full-stack task manager: React (Vite) frontend, Node/Express REST API, SQLite database, JWT authentication. Built as a complete, deployable CRUD application — the kind of project that's good evidence for a CS internship resume.
+TaskFlow is a full-stack task and project management system for the web and Windows desktop. It brings tasks, projects, calendar planning, reminders, analytics, and activity history together in one simple dashboard.
 
-## Features
+## Main features
 
-- User registration & login with hashed passwords (bcrypt) and JWT sessions
-- Full CRUD on tasks: create, read, update, delete
-- Tasks scoped per user — you can only ever see and edit your own
-- Filter/status fields: status (`todo` / `in_progress` / `done`) and priority (`low` / `medium` / `high`)
-- Kanban-style board UI, responsive down to mobile
-- Centralized error handling and input validation on the API
+- Secure user registration and login
+- Create, edit, complete, and delete tasks
+- Search tasks by title, description, status, priority, category, or project
+- Organize work with projects, categories, priorities, due dates, and subtasks
+- Open a project to see its tasks, progress, completed count, and remaining work
+- Daily, weekly, and monthly recurring tasks
+- Calendar, analytics, notifications, and activity history
+- Saved filters, task templates, and bulk task actions
+- Responsive web interface and installable Windows desktop application
+- Private task data: each user can only access their own tasks
 
-## Tech stack
+## Technology
 
-| Layer      | Technology                          |
-|------------|--------------------------------------|
-| Frontend   | React 18, React Router, Vite         |
-| Backend    | Node.js, Express                     |
-| Database   | SQLite (via `better-sqlite3`)        |
-| Auth       | JWT + bcrypt password hashing        |
+| Part | Technology |
+| --- | --- |
+| Frontend | React 18, React Router, Vite |
+| Backend | Node.js, Express |
+| Database | SQLite using Node.js `node:sqlite` |
+| Security | JWT authentication and bcrypt password hashing |
+| Desktop | Electron and electron-builder |
 
-SQLite is used instead of MongoDB/Postgres so the project runs anywhere with **zero external database setup** — no server to install or cloud instance to spin up. Swapping to Postgres later only means changing `backend/db.js`.
+## Run the web application
+
+Requirements: Node.js 22.5 or newer is recommended because the backend uses `node:sqlite`.
+
+1. Install the backend packages and start the API:
+
+   ```powershell
+   cd backend
+   npm install
+   npm run dev
+   ```
+
+2. Open another terminal, install the frontend packages, and start the website:
+
+   ```powershell
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. Open [http://localhost:5173](http://localhost:5173), register an account, and log in.
+
+The API runs at `http://localhost:4000`. SQLite creates the local database automatically.
+
+## Install the Windows desktop application
+
+Download `TaskFlow Setup 1.0.0.exe` from the latest GitHub release, run the installer, and follow the setup instructions. The desktop version stores its database locally on the computer.
+
+To build the installer yourself:
+
+```powershell
+npm install
+npm run dist:windows
+```
+
+The installer is created inside the `release` folder.
 
 ## Project structure
 
-```
+```text
 taskflow/
-├── backend/
-│   ├── server.js         # Express app entry point
-│   ├── db.js              # SQLite schema & connection
-│   ├── middleware/auth.js # JWT verification middleware
-│   └── routes/
-│       ├── auth.js        # register / login
-│       └── tasks.js       # task CRUD, scoped to logged-in user
-└── frontend/
-    └── src/
-        ├── api.js          # fetch wrapper + session helpers
-        ├── App.jsx         # routes + auth guard
-        ├── pages/          # Login, Register, Dashboard
-        └── components/     # TaskForm, TaskList (kanban board)
+|-- backend/          Express API, authentication, and SQLite database
+|-- electron/         Electron desktop application entry point
+|-- frontend/         React user interface
+|-- release/          Generated Windows installer
+|-- package.json      Desktop build configuration
+`-- README.md
 ```
 
-## Running it locally
+## Main API endpoints
 
-**Requirements:** Node.js 18+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/auth/register` | Create an account |
+| POST | `/api/auth/login` | Log in |
+| GET / PUT | `/api/auth/me` | Read or update the user profile |
+| GET / POST | `/api/tasks` | List or create tasks |
+| GET / PUT / DELETE | `/api/tasks/:id` | Read, update, or delete one task |
+| POST | `/api/tasks/bulk` | Update or delete selected tasks |
+| GET | `/api/tasks/activity` | Read activity history |
+| GET | `/api/tasks/notifications` | Read reminders and overdue alerts |
 
-### 1. Backend
+Authenticated endpoints require a JWT bearer token.
 
-```bash
-cd backend
-npm install
-cp .env.example .env   # optional: edit JWT_SECRET
-npm run dev
-```
+## Privacy and data
 
-The API runs at `http://localhost:4000`. A `taskflow.db` SQLite file is created automatically on first run.
+TaskFlow stores account and task data in SQLite. Passwords are hashed, and API routes verify that users can only access their own records. Do not commit database files or real credentials to GitHub.
 
-### 2. Frontend
+## Future improvements
 
-In a second terminal:
+- Cloud synchronization across devices
+- Email and desktop reminder delivery
+- Team workspaces and task assignment
+- File attachments and comments
+- Automated test coverage and GitHub Actions
+- Mobile application
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## Author
 
-Open `http://localhost:5173`. The dev server proxies `/api` requests to the backend automatically (see `vite.config.js`).
+Created by [Hueiqi](https://github.com/Hueiqi).
 
-### 3. Try it
+## License
 
-1. Register a new account
-2. Add a few tasks with different statuses/priorities
-3. Move a task between columns using the status dropdown, or edit/delete it
-
-## API reference
-
-| Method | Endpoint             | Auth | Description                |
-|--------|-----------------------|------|-----------------------------|
-| POST   | `/api/auth/register`  | No   | Create an account           |
-| POST   | `/api/auth/login`     | No   | Log in, get a JWT           |
-| GET    | `/api/tasks`          | Yes  | List your tasks (supports `?status=` and `?priority=`) |
-| POST   | `/api/tasks`          | Yes  | Create a task               |
-| PUT    | `/api/tasks/:id`      | Yes  | Update a task               |
-| DELETE | `/api/tasks/:id`      | Yes  | Delete a task               |
-
-Authenticated requests need `Authorization: Bearer <token>`.
-
-## Deploying it (for your live demo link)
-
-- **Backend:** Render or Railway free tier — set `JWT_SECRET` as an environment variable there.
-- **Frontend:** Vercel or Netlify — set the API proxy/base URL to your deployed backend URL.
-
-A live demo link is worth including in your resume/portfolio alongside the GitHub repo — recruiters are far more likely to click a live link than clone and run code.
-
-## Ideas to extend it (good "what I'd add next" talking points for interviews)
-
-- Task search and sorting
-- Due-date reminders / overdue highlighting
-- Drag-and-drop between columns (`@dnd-kit`)
-- Pagination for large task lists
-- Automated tests (Jest for backend, React Testing Library for frontend) + GitHub Actions CI
-
-## Suggested resume bullet
-
-> Built TaskFlow, a full-stack task management app (React, Node/Express, SQLite) with JWT authentication and a REST API supporting full CRUD operations, scoped per user with input validation and centralized error handling.
-
-## Suggested cover letter paragraph
-
-> To build hands-on experience with full-stack development, I built TaskFlow, a task management application with a React frontend and a Node/Express REST API backed by SQLite. I implemented JWT-based authentication, designed a normalized database schema, and wrote a fully validated CRUD API — deepening my understanding of how frontend and backend systems communicate in a real application. The project is available on GitHub at [your-repo-link].
+This project is currently provided for educational and portfolio use. Add a `LICENSE` file before allowing reuse or redistribution.
